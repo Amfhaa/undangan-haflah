@@ -839,6 +839,13 @@ ul {
     border-color: var(--champagne-gold);
 }
 
+.gallery {
+    background:
+        linear-gradient(to bottom, #013440, #02142b),
+        url('assets/pattern.png');
+    background-size: cover;
+    background-position: center;
+}
 /* =========================================
    RSVP & GUESTBOOK SECTION
    ========================================= */
