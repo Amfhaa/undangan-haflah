@@ -5,6 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    console.log('DOM sudah siap dimuat');
+
     /* =========================================
        ANIMASI AMPLOP
        ========================================= */
@@ -16,7 +18,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const backsound = document.getElementById('backsound');
     const musicToggle = document.getElementById('music-toggle');
 
-    envelopeContainer.addEventListener('click', () => {
+    console.log('Elemen amplop ditemukan:', {
+        envelopeContainer: !!envelopeContainer,
+        transitionScreen: !!transitionScreen,
+        envelopeOverlay: !!envelopeOverlay,
+        mainContent: !!mainContent
+    });
+
+    if (!envelopeContainer) {
+        console.error('amplop-container tidak ditemukan!');
+        return;
+    }
+
+    // Buat amplop dapat diklik dengan menghapus pointer-events: none
+    envelopeContainer.style.pointerEvents = 'auto';
+    envelopeContainer.style.cursor = 'pointer';
+
+    const handleEnvelopeClick = () => {
+        console.log('Amplop diklik!');
+        
         // Langkah 1: Berhenti mengambang, zoom kecil, flap terbuka
         envelopeContainer.classList.add('open-animation');
         if (envelopeHint) envelopeHint.style.opacity = '0';
@@ -30,18 +50,22 @@ document.addEventListener('DOMContentLoaded', () => {
             musicToggle.classList.add('playing');
         }
         
+        console.log('Menunggu flap terbuka...');
         // Tunggu flap terbuka (600ms)
         setTimeout(() => {
+            console.log('Flap terbuka, tarik kertas...');
             // Langkah 2: Tarik keluar kertas
             envelopeContainer.classList.add('pull-out');
             
             // Tunggu kertas keluar (1000ms)
             setTimeout(() => {
+                console.log('Kertas keluar, ekspansi layar transisi...');
                 // Langkah 3: Perluas layar transisi
                 transitionScreen.classList.add('expand');
                 
                 // Tunggu ekspansi menutupi layar (1000ms)
                 setTimeout(() => {
+                    console.log('Layar transisi menutup, tampilkan konten utama...');
                     // Langkah 4: Sembunyikan overlay, tampilkan situs utama
                     envelopeOverlay.classList.add('hidden');
                     mainContent.classList.remove('hidden');
@@ -57,7 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 900); // sedikit sebelum transisi selesai
             }, 1000);
         }, 600);
-    });
+    };
+
+    envelopeContainer.addEventListener('click', handleEnvelopeClick);
+    
+    // Tambahan: juga izinkan klik pada elemen dalam amplop
+    const envelope = document.querySelector('.envelope');
+    if (envelope) {
+        envelope.addEventListener('click', handleEnvelopeClick);
+    }
 
     // Kontrol pemutaran musik melalui tombol mengambang
     if (musicToggle && backsound) {
