@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Trigger fade in for main content
                     setTimeout(() => {
                         mainContent.classList.add('visible');
+                        // Trigger celebratory confetti effect from bottom corners
+                        triggerConfetti();
                     }, 50);
                     // Ensure window is scrolled to top
                     window.scrollTo(0, 0);
@@ -53,6 +55,71 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 1000);
         }, 600);
     });
+
+    // Confetti Cannon from Left and Right bottom corners
+    function triggerConfetti() {
+        if (typeof confetti !== 'function') {
+            console.error('Confetti library not loaded!');
+            return;
+        }
+
+        const duration = 1000;
+        const end = Date.now() + duration;
+        const colors = ['#d4af37', '#fef3c7', '#042f2e', '#064e3b', '#ffffff'];
+
+        // Big initial burst
+        confetti({
+            particleCount: 100,
+            angle: 60,
+            spread: 80,
+            origin: { x: 0, y: 1 },
+            colors: colors,
+            startVelocity: 70,
+            gravity: 0.9,
+            scalar: 1.2,
+            zIndex: 9999
+        });
+        confetti({
+            particleCount: 100,
+            angle: 120,
+            spread: 80,
+            origin: { x: 1, y: 1 },
+            colors: colors,
+            startVelocity: 70,
+            gravity: 0.9,
+            scalar: 1.2,
+            zIndex: 9999
+        });
+
+        // Continuous stream
+        const frame = setInterval(() => {
+            if (Date.now() > end) {
+                return clearInterval(frame);
+            }
+            confetti({
+                particleCount: 15,
+                angle: 60,
+                spread: 60,
+                origin: { x: 0, y: 1 },
+                colors: colors,
+                startVelocity: 60,
+                gravity: 0.9,
+                scalar: 1.2,
+                zIndex: 9999
+            });
+            confetti({
+                particleCount: 15,
+                angle: 120,
+                spread: 60,
+                origin: { x: 1, y: 1 },
+                colors: colors,
+                startVelocity: 60,
+                gravity: 0.9,
+                scalar: 1.2,
+                zIndex: 9999
+            });
+        }, 200);
+    }
     // Control music playback via the floating button
     if (musicToggle && backsound) {
         musicToggle.addEventListener('click', () => {
