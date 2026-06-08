@@ -245,6 +245,65 @@
                     </div>
                 </div>
         </section>
+
+        <!-- Attendance & Guest Book Section -->
+        <section class="attendance-section" id="absensi">
+            <div class="container">
+                <h2 class="section-title">Buku Absensi & Ucapan</h2>
+                
+                <div class="attendance-grid">
+                    <!-- Form Absensi Card -->
+                    <div class="attendance-form-card glass-card">
+                        <div class="card-header-elegant">
+                            <h3><i class="fa-solid fa-pen-to-square"></i> Isi Kehadiran</h3>
+                            <p>Silakan isi daftar hadir dan berikan ucapan doa terbaik Anda.</p>
+                        </div>
+                        <form id="attendance-form" class="elegant-form">
+                            <div class="form-group">
+                                <label for="guest-name"><i class="fa-solid fa-user"></i> Nama Lengkap</label>
+                                <input type="text" id="guest-name" required placeholder="Masukkan nama lengkap Anda..." autocomplete="off">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="guest-category"><i class="fa-solid fa-users"></i> Kategori Tamu</label>
+                                <select id="guest-category">
+                                    <option value="Santri">Santri</option>
+                                    <option value="Alumni">Alumni</option>
+                                    <option value="Wali Santri">Wali Santri</option>
+                                    <option value="Civitas">Civitas</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="guest-wishes"><i class="fa-solid fa-comment-dots"></i> Ucapan & Doa Restu</label>
+                                <textarea id="guest-wishes" rows="4" placeholder="Tuliskan ucapan selamat atau doa restu Anda di sini..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn-gold w-100" id="btn-submit-attendance">
+                                <span class="btn-text">Kirim Absensi</span>
+                                <span class="spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Live Wishes Feed Card -->
+                    <div class="wishes-feed-card glass-card">
+                        <div class="card-header-elegant">
+                            <h3><i class="fa-solid fa-comments"></i> Ucapan Hadirin</h3>
+                            <p>Doa dan harapan dari para hadirin takharruj.</p>
+                        </div>
+                        <div class="wishes-container" id="wishes-container">
+                            <!-- Live feed items will be generated here -->
+                            <div class="wishes-loading">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Memuat ucapan...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Farewell Section -->
         <section class="farewell-section">
             <div class="container">
@@ -309,7 +368,7 @@
                             <i class="fa-solid fa-mosque"></i>
                             <i class="fa-solid fa-star-and-crescent"></i>
                         </div>
-                        <p class="footer-rights">&copy; 2026 Peismataris. All rights reserved.</p>
+                        <p class="footer-rights">&copy; 2026 Peismataris. All rights reserved. | <a href="#" id="admin-login-trigger" class="admin-link"><i class="fa-solid fa-key"></i> Portal Admin</a></p>
                     </div>
                     <!-- Logos -->
                     <div class="footer-partner-logos">
@@ -326,6 +385,154 @@
     <div id="gallery-modal" class="gallery-modal">
         <span class="modal-close">&times;</span>
         <img class="modal-content" id="modal-img">
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="admin-modal" class="admin-modal">
+        <div class="admin-modal-content glass-card">
+            <span class="admin-modal-close" id="admin-close">&times;</span>
+            
+            <!-- Step 1: Admin Authorization Form -->
+            <div id="admin-auth-container" class="admin-auth-container">
+                <div class="text-center auth-header">
+                    <i class="fa-solid fa-shield-halved auth-icon"></i>
+                    <h2>Otorisasi Admin</h2>
+                    <p>Masukkan kata sandi admin untuk masuk ke dashboard absensi.</p>
+                </div>
+                <form id="admin-auth-form" class="elegant-form">
+                    <div class="form-group">
+                        <label for="admin-password"><i class="fa-solid fa-lock"></i> Kata Sandi</label>
+                        <input type="password" id="admin-password" required placeholder="Masukkan kata sandi admin..." autocomplete="current-password">
+                        <p class="auth-error-msg hidden" id="auth-error"><i class="fa-solid fa-circle-exclamation"></i> Kata sandi salah!</p>
+                    </div>
+                    <button type="submit" class="btn-gold w-100">Masuk</button>
+                </form>
+            </div>
+
+            <!-- Step 2: Admin Dashboard Content (Hidden initially) -->
+            <div id="admin-dashboard-container" class="admin-dashboard-container hidden">
+                <div class="dashboard-header">
+                    <h2><i class="fa-solid fa-chart-line"></i> Dashboard Absensi Tamu</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn-outline-gold btn-sm" id="btn-export-csv"><i class="fa-solid fa-download"></i> Ekspor CSV</button>
+                        <button class="btn-outline-gold btn-sm btn-danger-outline" id="btn-reset-data"><i class="fa-solid fa-trash-can"></i> Reset Data</button>
+                        <button class="btn-outline-gold btn-sm" id="btn-admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Tabs -->
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" data-tab="tab-data"><i class="fa-solid fa-table-list"></i> Data Tamu</button>
+                    <button class="tab-btn" data-tab="tab-settings"><i class="fa-solid fa-gears"></i> Pengaturan</button>
+                </div>
+
+                <div class="tab-contents">
+                    <!-- Tab 1: Data Tamu -->
+                    <div class="tab-content active" id="tab-data">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-address-book"></i></div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Total Absen</span>
+                                    <h3 class="stat-val" id="stat-total-submissions">0</h3>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Santri</span>
+                                    <h3 class="stat-val" id="stat-santri">0</h3>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Alumni</span>
+                                    <h3 class="stat-val" id="stat-alumni">0</h3>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-house-chimney-user"></i></div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Wali Santri</span>
+                                    <h3 class="stat-val" id="stat-wali-santri">0</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search and Filter Bar -->
+                        <div class="search-filter-bar">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-guest" placeholder="Cari nama atau ucapan...">
+                            </div>
+                            <div class="filter-box">
+                                <select id="filter-category">
+                                    <option value="all">Semua Kategori</option>
+                                    <option value="Santri">Santri</option>
+                                    <option value="Alumni">Alumni</option>
+                                    <option value="Wali Santri">Wali Santri</option>
+                                    <option value="Civitas">Civitas</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Data Table Container -->
+                        <div class="table-responsive hide-on-mobile">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Kategori</th>
+                                        <th>Ucapan</th>
+                                        <th>Waktu Hadir</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-body">
+                                    <!-- Dynamic rows -->
+                                    <tr>
+                                        <td colspan="6" class="text-center">Memuat data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card Container (visible on mobile only) -->
+                        <div class="admin-mobile-cards show-on-mobile" id="admin-mobile-cards">
+                            <!-- Dynamic cards will be generated here -->
+                            <div class="text-center" style="padding: 20px 0; opacity: 0.8;">Memuat data...</div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Settings -->
+                    <div class="tab-content" id="tab-settings">
+                        <form id="admin-settings-form" class="elegant-form settings-form">
+                            <div class="settings-section-title">Otomatisasi Google Sheets</div>
+                            <p class="settings-desc">Masukkan URL Web App Google Apps Script Anda untuk sinkronisasi otomatis data absensi secara online.</p>
+                            
+                            <div class="form-group">
+                                <label for="settings-script-url"><i class="fa-solid fa-link"></i> Google Apps Script URL</label>
+                                <input type="url" id="settings-script-url" placeholder="https://script.google.com/macros/s/.../exec">
+                            </div>
+                            
+                            <div class="settings-actions">
+                                <button type="submit" class="btn-gold">Simpan Pengaturan</button>
+                                <span id="settings-success-msg" class="settings-toast hidden"><i class="fa-solid fa-circle-check"></i> Pengaturan disimpan!</span>
+                            </div>
+                        </form>
+
+                        <div class="quick-guide-card">
+                            <h4><i class="fa-solid fa-circle-info"></i> Petunjuk Cepat Sinkronisasi</h4>
+                            <p>Untuk mengaktifkan sinkronisasi otomatis dengan Google Spreadsheet Anda, salin kode Apps Script yang tertera pada panduan implementasi, lakukan deployment sebagai <strong>Aplikasi Web</strong> (Web App) dengan akses <strong>"Siapa saja" (Anyone)</strong>, lalu tempelkan URL hasilnya pada kolom di atas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <audio id="backsound" src="backsound.mp3" loop></audio>
