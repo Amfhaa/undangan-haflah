@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Step 1: Stop floating, slight zoom, flap opens
         envelopeContainer.classList.add('open-animation');
         if (envelopeHint) envelopeHint.style.opacity = '0';
-        
+
         // Play audio immediately on envelope click (user interaction trigger)
         if (backsound) {
             backsound.play().catch(err => console.log('Audio playback failed:', err));
@@ -26,23 +26,23 @@ document.addEventListener('DOMContentLoaded', () => {
             musicToggle.classList.add('visible');
             musicToggle.classList.add('playing');
         }
-        
+
         // Wait for flap to open (600ms)
         setTimeout(() => {
             // Step 2: Pull out paper
             envelopeContainer.classList.add('pull-out');
-            
+
             // Wait for paper to come out (1000ms)
             setTimeout(() => {
                 // Step 3: Expand transition screen
                 transitionScreen.classList.add('expand');
-                
+
                 // Wait for expansion to cover screen (1000ms)
                 setTimeout(() => {
                     // Step 4: Hide overlay, show main site
                     envelopeOverlay.classList.add('hidden');
                     mainContent.classList.remove('hidden');
-                    
+
                     // Trigger fade in for main content
                     setTimeout(() => {
                         mainContent.classList.add('visible');
@@ -199,6 +199,8 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
     // 1. Inisialisasi Database Lokal & Konfigurasi Default
     const DEFAULT_PASS = "angkatan36nihbos";
+    // Taruh URL Google Apps Script Web App Anda di bawah ini agar sinkronisasi berfungsi secara global di HP dan laptop tamu
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx2iMgNtNQOYGiql7ipyQk2CbE6IO_EACghWUjtKteLv7VUn8kL__mXkE2qzHaDg0aE/exec";
     const MOCK_WISHES = [
         {
             id: "mock-1",
@@ -275,10 +277,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderWishes() {
         if (!wishesContainer) return;
         wishesContainer.innerHTML = "";
-        
+
         // Filter tamu yang memiliki ucapan saja
         const itemsWithWishes = attendanceData.filter(item => item.ucapan && item.ucapan.trim() !== "");
-        
+
         if (itemsWithWishes.length === 0) {
             wishesContainer.innerHTML = '<div class="wishes-empty"><i class="fa-regular fa-comment-dots"></i> Belum ada ucapan. Jadilah yang pertama!</div>';
             return;
@@ -290,9 +292,9 @@ document.addEventListener("DOMContentLoaded", function () {
         sortedWishes.forEach(item => {
             const card = document.createElement("div");
             card.className = "wish-card";
-            
+
             const relativeTime = getRelativeTime(item.timestamp);
-            
+
             card.innerHTML = `
                 <div class="wish-meta">
                     <span class="wish-name">${escapeHTML(item.nama)}</span>
@@ -311,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (attendanceForm) {
         attendanceForm.addEventListener("submit", async function (e) {
             e.preventDefault();
-            
+
             const btnSubmit = document.getElementById("btn-submit-attendance");
             const btnText = btnSubmit.querySelector(".btn-text");
             const spinner = btnSubmit.querySelector(".spinner");
@@ -341,12 +343,12 @@ document.addEventListener("DOMContentLoaded", function () {
             // 1. Simpan Lokal
             attendanceData.unshift(newEntry);
             localStorage.setItem("haflah_attendance", JSON.stringify(attendanceData));
-            
+
             // Render ulang ucapan di frontend
             renderWishes();
 
             // 2. Sinkronisasi Google Sheets
-            const scriptUrl = localStorage.getItem("haflah_script_url");
+            const scriptUrl = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
             if (scriptUrl) {
                 try {
                     // Kirim ke Google Apps Script (menggunakan text/plain untuk bypass CORS preflight)
@@ -372,12 +374,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         origin: { y: 0.8 }
                     });
                 }
-                
+
                 alert(`Terima kasih ${name}, absensi Anda berhasil dikirim!`);
-                
+
                 // Reset form
                 attendanceForm.reset();
-                
+
                 // Reset Loading State
                 btnSubmit.disabled = false;
                 btnText.style.opacity = "1";
@@ -392,9 +394,9 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             adminModal.style.display = "flex";
             adminPasswordInput.focus();
-            
+
             // Muat URL script di tab settings
-            const scriptUrl = localStorage.getItem("haflah_script_url");
+            const scriptUrl = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
             if (scriptUrl && settingsScriptUrl) {
                 settingsScriptUrl.value = scriptUrl;
             }
@@ -433,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 authError.classList.add("hidden");
                 authContainer.classList.add("hidden");
                 dashboardContainer.classList.remove("hidden");
-                
+
                 // Sinkronisasi data dari Google Sheets (jika URL terpasang) sebelum render
                 syncDataFromGoogleSheets().then(() => {
                     updateDashboard();
@@ -457,14 +459,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 7. Google Sheets Data Fetch (Sync)
     async function syncDataFromGoogleSheets() {
-        const scriptUrl = localStorage.getItem("haflah_script_url");
+        const scriptUrl = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
         if (!scriptUrl) return;
 
         try {
             const response = await fetch(scriptUrl);
             if (!response.ok) throw new Error("Network response was not ok");
             const cloudData = await response.json();
-            
+
             if (Array.isArray(cloudData) && cloudData.length > 0) {
                 // Format data dari Google Sheets (sesuaikan huruf kecil kolom)
                 const formattedData = cloudData.map((row, index) => ({
@@ -491,10 +493,10 @@ document.addEventListener("DOMContentLoaded", function () {
     tabBtns.forEach(btn => {
         btn.addEventListener("click", function () {
             const targetTab = this.getAttribute("data-tab");
-            
+
             tabBtns.forEach(b => b.classList.remove("active"));
             tabContents.forEach(c => c.classList.remove("active"));
-            
+
             this.classList.add("active");
             const contentEl = document.getElementById(targetTab);
             if (contentEl) contentEl.classList.add("active");
@@ -509,8 +511,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Filter data tamu
         const filteredData = attendanceData.filter(item => {
-            const matchKeyword = item.nama.toLowerCase().includes(keyword) || 
-                                 (item.ucapan && item.ucapan.toLowerCase().includes(keyword));
+            const matchKeyword = item.nama.toLowerCase().includes(keyword) ||
+                (item.ucapan && item.ucapan.toLowerCase().includes(keyword));
             const matchCategory = categoryFilter === "all" || item.kategori === categoryFilter;
             return matchKeyword && matchCategory;
         });
@@ -628,7 +630,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (settingsForm) {
         settingsForm.addEventListener("submit", function (e) {
             e.preventDefault();
-            
+
             // 1. Simpan URL Apps Script
             const urlInput = settingsScriptUrl.value.trim();
             if (urlInput) {
@@ -661,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             let csvContent = "data:text/csv;charset=utf-8,";
-            
+
             // Headers
             csvContent += "No,Nama,Kategori,Ucapan,Waktu Kehadiran\r\n";
 
@@ -692,7 +694,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnResetData.addEventListener("click", function () {
             const inputPass = prompt("Masukkan kata sandi konfirmasi untuk mereset seluruh data:");
             if (inputPass === null) return; // User cancelled the prompt
-            
+
             if (inputPass === "peismatariskeren") {
                 if (confirm("PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data absensi tamu? Tindakan ini akan mengosongkan data lokal.")) {
                     const confirmSecond = confirm("TINDAKAN INI TIDAK BISA DIBATALKAN. Anda yakin ingin melanjutkan?");
@@ -713,7 +715,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // 12. Helper Functions
     function escapeHTML(str) {
         if (!str) return "";
-        return str.replace(/[&<>'"]/g, 
+        return str.replace(/[&<>'"]/g,
             tag => ({
                 "&": "&amp;",
                 "<": "&lt;",
@@ -743,11 +745,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const diffMs = now - date;
         const diffMins = Math.floor(diffMs / 60000);
         const diffHrs = Math.floor(diffMins / 60);
-        
+
         if (diffMins < 1) return "Baru saja";
         if (diffMins < 60) return `${diffMins} menit yang lalu`;
         if (diffHrs < 24) return `${diffHrs} jam yang lalu`;
-        
+
         return date.toLocaleDateString("id-ID", {
             day: "2-digit",
             month: "short"
@@ -758,7 +760,7 @@ document.addEventListener("DOMContentLoaded", function () {
     renderWishes();
 
     // Jalankan sync Google Sheets di latar belakang jika ada URL
-    if (localStorage.getItem("haflah_script_url")) {
+    if (localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL) {
         syncDataFromGoogleSheets();
     }
 });
