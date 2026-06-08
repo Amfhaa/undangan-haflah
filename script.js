@@ -238,15 +238,22 @@ document.addEventListener("DOMContentLoaded", function () {
     let attendanceData = [];
     try {
         const stored = localStorage.getItem("haflah_attendance");
+        const hasDatabase = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
         if (stored) {
             attendanceData = JSON.parse(stored);
+            // Hapus mock data lama jika sudah ada integrasi database asli
+            if (hasDatabase && attendanceData.some(item => item.id && item.id.startsWith("mock-"))) {
+                attendanceData = [];
+                localStorage.setItem("haflah_attendance", JSON.stringify(attendanceData));
+            }
         } else {
-            attendanceData = [...MOCK_WISHES];
+            attendanceData = hasDatabase ? [] : [...MOCK_WISHES];
             localStorage.setItem("haflah_attendance", JSON.stringify(attendanceData));
         }
     } catch (e) {
         console.error("Gagal membaca localStorage", e);
-        attendanceData = [...MOCK_WISHES];
+        const hasDatabase = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
+        attendanceData = hasDatabase ? [] : [...MOCK_WISHES];
     }
 
     // 2. Element Selectors
@@ -467,11 +474,11 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok) throw new Error("Network response was not ok");
             const cloudData = await response.json();
 
-            if (Array.isArray(cloudData) && cloudData.length > 0) {
+            if (Array.isArray(cloudData)) {
                 // Format data dari Google Sheets (sesuaikan huruf kecil kolom)
                 const formattedData = cloudData.map((row, index) => ({
                     id: row.id || "cloud-" + index + "-" + Date.now(),
-                    timestamp: row.timestamp || new Date().toISOString(),
+                    timestamp: row.timestamp || row.timestamp || row["time stamp"] || new Date().toISOString(),
                     nama: row.nama || "",
                     alamat: row.alamat || row.asal || "",
                     kategori: row.kategori || "Tamu Undangan",
@@ -483,6 +490,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 attendanceData = formattedData.reverse();
                 localStorage.setItem("haflah_attendance", JSON.stringify(attendanceData));
                 renderWishes();
+                
+                // Update dashboard UI jika sedang terbuka
+                if (dashboardContainer && !dashboardContainer.classList.contains("hidden")) {
+                    updateDashboard();
+                }
             }
         } catch (err) {
             console.error("Gagal sinkronisasi data dari Google Sheets:", err);
@@ -701,9 +713,26 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (confirmSecond) {
                         attendanceData = [];
                         localStorage.setItem("haflah_attendance", JSON.stringify(attendanceData));
+                        
+                        // Hapus juga di Google Sheets jika terintegrasi
+                        const scriptUrl = localStorage.getItem("haflah_script_url") || DEFAULT_SCRIPT_URL;
+                        if (scriptUrl) {
+                            fetch(scriptUrl, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "text/plain"
+                                },
+                                body: JSON.stringify({ action: "clear" })
+                            }).then(response => {
+                                console.log("Google Sheets database cleared");
+                            }).catch(err => {
+                                console.error("Gagal mereset Google Sheets:", err);
+                            });
+                        }
+                        
                         renderWishes();
                         updateDashboard();
-                        alert("Semua data absensi lokal berhasil dihapus.");
+                        alert("Semua data absensi berhasil dihapus.");
                     }
                 }
             } else {
